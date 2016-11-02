@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tabs>
+    <tab
+        id="@+id/tab_image"
+        icon="@drawable/ic_image"
+        title="Photos" />
+    <tab
+        id="@+id/tab_video"
+        icon="@drawable/ic_movie"
+        title="Videos" />
+    <!--<tab-->
+        <!--id="@+id/tab_fav"-->
+        <!--icon="@drawable/ic_favorite"-->
+        <!--title="Favourites" />-->
+</tabs>
