@@ -77,7 +77,7 @@ public class PhotoFragment extends Fragment {
         super.onCreate(savedInstanceState);
         context = getActivity();
         database = FirebaseDatabase.getInstance();
-        query = database.getReference("photos").limitToLast(100);
+        query = database.getReference("photos").orderByChild("time").limitToLast(100);
         mAuth = FirebaseAuth.getInstance();
         preferences  = PreferenceManager.getDefaultSharedPreferences(context);
 
@@ -186,7 +186,7 @@ public class PhotoFragment extends Fragment {
                     @Override
                     public void onClick(View view, final int position) {
 
-                        if(posts.get(position).getPrivacy()){
+                        if(posts.get(position).getPrivacy() && !posts.get(position).getUid().equals(preferences.getString("LOGGEDIN_UID",""))){
                             AlertDialog dialog = new AlertDialog.Builder(context)
                                     .setTitle("Private moment")
                                     .setMessage("This is a private moment. You need permission to view this moment.")

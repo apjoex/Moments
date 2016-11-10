@@ -63,6 +63,7 @@ public class SplashScreen extends AppCompatActivity {
                     Log.d("Memories", "onAuthStateChanged:signed_in:" + user.getUid());
                     editor = preferences.edit();
                     editor.putString("LOGGEDIN_UID",user.getUid());
+                    editor.putBoolean("Moments_signin",true);
                     editor.apply();
 
                     //Start notification service

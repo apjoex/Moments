@@ -46,16 +46,12 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
     private ArrayList<Post> posts;
     private Context context;
     private int type;
-    private RecyclerView photo_list;
-    private Boolean expanded;
 
 
     public FeedsAdapter(Context context, ArrayList<Post> posts, int type, RecyclerView photo_list, Boolean expanded) {
         this.context = context;
         this.posts = posts;
         this.type = type;
-        this.photo_list = photo_list;
-        this.expanded = expanded;
     }
 
     @Override
@@ -80,10 +76,7 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
 
         if(type == 1){
             //For photos
-
-            if(!expanded){
-
-                if(posts.get(position).getPrivacy()){
+                if(posts.get(position).getPrivacy() && !posts.get(position).getUid().equals(preferences.getString("LOGGEDIN_UID",""))){
                     if(holder.thumbnail != null){
                         holder.privacy_logo.setVisibility(View.INVISIBLE);
                         Glide.with(context)
@@ -116,111 +109,9 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
                                 .into(holder.thumbnail);
                     }
                 }
-
-//                RelativeLayout.LayoutParams parms = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, Utilities.dp2px(context,120));
-//                parms.setMargins(1,1,1,1);
-//                holder.thumbnail.setLayoutParams(parms);
-            }else{
-                //In listview
-
-                if(posts.get(position).getPrivacy()){
-                    RelativeLayout.LayoutParams parms = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, Utilities.dp2px(context,0));
-                    holder.thumbnail.setLayoutParams(parms);
-                    holder.privacy_logo.setVisibility(View.GONE);
-                    if(holder.thumbnail != null){
-                        Glide.with(context)
-                                .load(posts.get(position).getUrl())
-                                .bitmapTransform(new BlurTransformation(context,50), new CropSquareTransformation(context))
-                                .into(holder.thumbnail);
-                    }
-                }else{
-                    RelativeLayout.LayoutParams parms = new RelativeLayout.LayoutParams(Utilities.dp2px(context,400), Utilities.dp2px(context,400));
-                    parms.setMargins(1,1,1,1);
-                    holder.thumbnail.setLayoutParams(parms);
-                    holder.privacy_logo.setVisibility(View.INVISIBLE);
-                    if(holder.thumbnail != null){
-                        Glide.with(context)
-                                .load(posts.get(position).getUrl())
-                                .placeholder(R.drawable.memories_grey_big)
-                                .centerCrop()
-                                .override(500,500)
-                                .into(holder.thumbnail);
-                    }
-                }
-
-            }
-
-
-
-            holder.thumbnail.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-//                    if(posts.get(position).getPrivacy()){
-//                        AlertDialog dialog = new AlertDialog.Builder(context)
-//                                .setTitle("Private moment")
-//                                .setMessage("This is a private moment. You need permission to view this moment.")
-//                                .setPositiveButton("REQUEST PERMISSION", new DialogInterface.OnClickListener() {
-//                                    @Override
-//                                    public void onClick(DialogInterface dialogInterface, int i) {
-//                                        final ProgressDialog progressDialog = ProgressDialog.show(context, null, "Requesting...", false, false);
-//                                        Request request = new Request(preferences.getString("LOGGEDIN_NAME","Someone"),preferences.getString("LOGGEDIN_UID",""), Utilities.getTime(),"photo","sent",posts.get(position).getUrl(),posts.get(position).getCaption());
-//                                        FirebaseDatabase.getInstance().getReference().child("notifications").child(posts.get(position).getUid()).child(request.getUid()+"_"+request.getTime()).setValue(request, new DatabaseReference.CompletionListener() {
-//                                            @Override
-//                                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-//                                                Toast.makeText(context,"Request sent. You'll get notified when you are granted permission to view the moment",Toast.LENGTH_SHORT).show();
-//                                                if(progressDialog.isShowing()){
-//                                                    progressDialog.dismiss();
-//                                                }
-//                                            }
-//                                        });
-//                                    }
-//                                }).setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-//                                    @Override
-//                                    public void onClick(DialogInterface dialogInterface, int i) {
-//                                        dialogInterface.dismiss();
-//                                    }
-//                                }).create();
-//                        dialog.show();
-//                    }else{
-////                        Intent intent = new Intent(context, PhotoViewer.class);
-////                        intent.putExtra("position",position);
-////                        Bundle bundle = new Bundle();
-////                        bundle.putSerializable("posts",posts);
-////                        intent.putExtras(bundle);
-////                        context.startActivity(intent);
-//
-////                        Bundle bundle = new Bundle();
-////                        bundle.putSerializable("posts", posts);
-////                        bundle.putInt("position", position);
-////
-////                        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-////                        SlideShowDialogFragment newFragment = SlideShowDialogFragment.newInstance();
-////                        newFragment.setArguments(bundle);
-////                        newFragment.show(ft, "slideshow");
-//
-//
-////                        if(!expanded){
-////                            photo_list.setLayoutManager(new LinearLayoutManager(context));
-////                            photo_list.setAdapter(new FeedsAdapter(context,posts,1,photo_list,true));
-////                        }else{
-////                            photo_list.setLayoutManager(new GridLayoutManager(context,3));
-////                            photo_list.setAdapter(new FeedsAdapter(context,posts,1,photo_list,false));
-////                        }
-//
-////                        AlertDialog dialog = new AlertDialog.Builder(context)
-////                                .setMessage(posts.get(position).getUrl())
-////                                .create();
-////                        dialog.show();
-//
-//                    }
-                }
-            });
-
         }else{
             //For videos
-//            holder.caption.setTypeface(null, Typeface.ITALIC);
             holder.caption.setText(posts.get(position).getCaption());
-
             if(posts.get(position).getPrivacy()){
                 holder.privacy_logo.setVisibility(View.VISIBLE);
             }else {
@@ -230,11 +121,7 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
             holder.video_item_box.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if(!posts.get(position).getPrivacy()){
-                        Intent intent = new Intent(context, VideoPlay.class);
-                        intent.putExtra("video_url",posts.get(position).getUrl());
-                        context.startActivity(intent);
-                    }else{
+                    if(posts.get(position).getPrivacy()  && !posts.get(position).getUid().equals(preferences.getString("LOGGEDIN_UID",""))){
                         AlertDialog dialog = new AlertDialog.Builder(context)
                                 .setTitle("Private moment")
                                 .setMessage("This is a private moment. You need permission to view this moment.")
@@ -260,6 +147,10 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
                                     }
                                 }).create();
                         dialog.show();
+                    }else{
+                        Intent intent = new Intent(context, VideoPlay.class);
+                        intent.putExtra("video_url",posts.get(position).getUrl());
+                        context.startActivity(intent);
                     }
 
                 }

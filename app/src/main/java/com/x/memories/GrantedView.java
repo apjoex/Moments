@@ -1,14 +1,21 @@
 package com.x.memories;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
@@ -67,7 +74,13 @@ public class GrantedView extends AppCompatActivity {
             saveBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    saveToInternalStorage(granted_image, Utilities.getTime());
+                    if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(GrantedView.this,
+                                new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                10);
+                    }else{
+                        saveToInternalStorage(granted_image, Utilities.getTime());
+                    }
                 }
             });
         }else{
@@ -112,6 +125,20 @@ public class GrantedView extends AppCompatActivity {
                 .into(granted_image);
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case 10: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    saveToInternalStorage(granted_image, Utilities.getTime());
+                } else {
+                    Toast.makeText(context,"Please grant permissions to save moments",Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
     private void saveToInternalStorage(ImageView imageViewPreview, String time){
         GlideBitmapDrawable drawable = (GlideBitmapDrawable) imageViewPreview.getDrawable();
         Bitmap bitmap = drawable.getBitmap();
@@ -123,6 +150,19 @@ public class GrantedView extends AppCompatActivity {
         File mypath = new File(Environment.getExternalStorageDirectory().getPath()+"/Moments");
 
         if(mypath.exists() && mypath.isDirectory()){
+            int w = bitmap.getWidth();
+            int h = bitmap.getHeight();
+            Bitmap result = Bitmap.createBitmap(w, h, bitmap.getConfig());
+            Canvas canvas = new Canvas(result);
+            canvas.drawBitmap(bitmap, 0, 0, null);
+            Paint paint = new Paint();
+            paint.setColor(Color.argb(120,255,255,255));
+            paint.setTextSize(100);
+            paint.setAntiAlias(true);
+            paint.setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Al_Fresco.otf"));
+            int xPos = (canvas.getWidth() - 250);
+            int yPos = (canvas.getHeight() - 20);
+            canvas.drawText("moments",xPos, yPos, paint);
             File savepath = new File(mypath, "moments_" + time + ".jpg");
             FileOutputStream fos = null;
             try {
@@ -144,6 +184,19 @@ public class GrantedView extends AppCompatActivity {
 
         }else{
             mypath.mkdir();
+            int w = bitmap.getWidth();
+            int h = bitmap.getHeight();
+            Bitmap result = Bitmap.createBitmap(w, h, bitmap.getConfig());
+            Canvas canvas = new Canvas(result);
+            canvas.drawBitmap(bitmap, 0, 0, null);
+            Paint paint = new Paint();
+            paint.setColor(Color.argb(120,255,255,255));
+            paint.setTextSize(100);
+            paint.setAntiAlias(true);
+            paint.setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Al_Fresco.otf"));
+            int xPos = (canvas.getWidth() - 250);
+            int yPos = (canvas.getHeight() - 20);
+            canvas.drawText("moments",xPos, yPos, paint);
             File savepath = new File(mypath, "moments_" + time + ".jpg");
             FileOutputStream fos = null;
             try {

@@ -32,9 +32,9 @@ dependencies {
     compile 'com.google.firebase:firebase-database:9.4.0'
     compile 'com.google.firebase:firebase-storage:9.4.0'
     compile 'jp.wasabeef:glide-transformations:2.0.1'
-//    compile 'com.afollestad:easyvideoplayer:0.2.12'
     compile 'com.isseiaoki:simplecropview:1.1.4'
     compile 'uk.co.chrisjenx:calligraphy:2.2.0'
+    compile 'com.firebase:geofire-android:2.1.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

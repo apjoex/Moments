@@ -42,6 +42,7 @@ public class Home extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseAuth mAuth;
     private FirebaseDatabase database;
+    SharedPreferences preferences;
 
 
     @Override
@@ -51,6 +52,7 @@ public class Home extends AppCompatActivity {
         context = this;
         mAuth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance();
+        preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         //Set light status bar
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -156,13 +158,12 @@ public class Home extends AppCompatActivity {
 //                }
 //            }
 //        });
-
-
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_home, menu);
+        menu.getItem(0).setTitle(preferences.getString("LOGGEDIN_NAME","Profile"));
         return true;
     }
 
@@ -244,6 +245,36 @@ public class Home extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        showExit();
+    }
+
+    private void showExit() {
+        AlertDialog.Builder exit_builder = new AlertDialog.Builder(context);
+        exit_builder.setTitle("Exit")
+                .setMessage("Do you really want to exit this app?")
+                .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        closeApp();
+                    }
+                })
+                .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                })
+                .create().show();
+    }
+
+    public void closeApp() {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
 
     @Override
     protected void attachBaseContext(Context newBase) {

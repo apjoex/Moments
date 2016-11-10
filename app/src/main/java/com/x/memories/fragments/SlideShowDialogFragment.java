@@ -3,16 +3,27 @@ package com.x.memories.fragments;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -61,18 +72,8 @@ public class SlideShowDialogFragment extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.activity_photo_viewer, container, false);
         viewPager = (ViewPager) v.findViewById(R.id.pager);
-
-
-//        lblCount = (TextView) v.findViewById(R.id.lbl_count);
-//        lblTitle = (TextView) v.findViewById(R.id.title);
-//        lblDate = (TextView) v.findViewById(R.id.date);
-
         posts = (ArrayList<Post>) getArguments().getSerializable("posts");
         selectedPosition = getArguments().getInt("position");
-
-//        Log.e(TAG, "position: " + selectedPosition);
-//        Log.e(TAG, "images size: " + images.size());
-
         myViewPagerAdapter = new MyViewPagerAdapter();
         viewPager.setAdapter(myViewPagerAdapter);
         viewPager.addOnPageChangeListener(viewPagerPageChangeListener);
@@ -116,6 +117,28 @@ public class SlideShowDialogFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+    }
+
+    public void removeFragment(Fragment fragment){
+        android.support.v4.app.FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        fragmentTransaction.remove(fragment);
+        fragmentTransaction.commit();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case 10: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    myViewPagerAdapter.proceed();
+                } else {
+                    Toast.makeText(getActivity(),"Please grant permissions to save moments",Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
     }
 
 
@@ -168,11 +191,18 @@ public class SlideShowDialogFragment extends DialogFragment {
             favBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    saveToInternalStorage(imageViewPreview,post.getTime());
+
+                    if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(getActivity(),
+                                new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                10);
+                    }else{
+                        saveToInternalStorage(imageViewPreview,post.getTime());
+                    }
                 }
             });
 
-            if(post.getPrivacy()){
+            if(post.getPrivacy() && !posts.get(position).getUid().equals(preferences.getString("LOGGEDIN_UID",""))){
                 request_btn.setVisibility(View.VISIBLE);
                 captionText.setVisibility(View.INVISIBLE);
                 Glide.with(getActivity())
@@ -222,6 +252,15 @@ public class SlideShowDialogFragment extends DialogFragment {
                         .into(imageViewPreview);
             }
 
+            final ScaleGestureDetector mScaleDetector = new ScaleGestureDetector(getActivity(), new MyPinchListener());
+            imageViewPreview.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    mScaleDetector.onTouchEvent(event);
+                    return true;
+                }
+            });
+
             container.addView(view);
 
             return view;
@@ -238,12 +277,25 @@ public class SlideShowDialogFragment extends DialogFragment {
             File mypath = new File(Environment.getExternalStorageDirectory().getPath()+"/Moments");
 
             if(mypath.exists() && mypath.isDirectory()){
+                int w = bitmap.getWidth();
+                int h = bitmap.getHeight();
+                Bitmap result = Bitmap.createBitmap(w, h, bitmap.getConfig());
+                Canvas canvas = new Canvas(result);
+                canvas.drawBitmap(bitmap, 0, 0, null);
+                Paint paint = new Paint();
+                paint.setColor(Color.argb(120,255,255,255));
+                paint.setTextSize(100);
+                paint.setAntiAlias(true);
+                paint.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"fonts/Al_Fresco.otf"));
+                int xPos = (canvas.getWidth() - 250);
+                int yPos = (canvas.getHeight() - 20);
+                canvas.drawText("moments",xPos, yPos, paint);
                 File savepath = new File(mypath, "moments_" + time + ".jpg");
                 FileOutputStream fos = null;
                 try {
                     fos = new FileOutputStream(savepath);
                     // Use the compress method on the BitMap object to write image to the OutputStream
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                    result.compress(Bitmap.CompressFormat.JPEG, 100, fos);
                     Toast.makeText(getActivity(), "Moment saved successfully", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -259,6 +311,19 @@ public class SlideShowDialogFragment extends DialogFragment {
 
             }else{
                 mypath.mkdir();
+                int w = bitmap.getWidth();
+                int h = bitmap.getHeight();
+                Bitmap result = Bitmap.createBitmap(w, h, bitmap.getConfig());
+                Canvas canvas = new Canvas(result);
+                canvas.drawBitmap(bitmap, 0, 0, null);
+                Paint paint = new Paint();
+                paint.setColor(Color.argb(120,255,255,255));
+                paint.setTextSize(100);
+                paint.setAntiAlias(true);
+                paint.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"fonts/Al_Fresco.otf"));
+                int xPos = (canvas.getWidth() - 250);
+                int yPos = (canvas.getHeight() - 20);
+                canvas.drawText("moments",xPos, yPos, paint);
                 File savepath = new File(mypath, "moments_" + time + ".jpg");
                 FileOutputStream fos = null;
                 try {
@@ -299,6 +364,20 @@ public class SlideShowDialogFragment extends DialogFragment {
             container.removeView((View) object);
         }
 
+        void proceed() {
+            Toast.makeText(getActivity(),"Great! Permission granted. Let's try that once more...",Toast.LENGTH_SHORT).show();
+        }
 
+        private class MyPinchListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+            @Override
+            public boolean onScale(ScaleGestureDetector detector) {
+                Log.d("TAG", "PINCH! OUCH!");
+                Log.d("SCATE FACTOR", ""+detector.getScaleFactor());
+                if(detector.getScaleFactor() < 0.90){
+                    removeFragment(SlideShowDialogFragment.this);
+                }
+                return true;
+            }
+        }
     }
 }

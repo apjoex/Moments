@@ -2,11 +2,13 @@ package com.x.memories;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.view.MenuItemCompat;
@@ -37,9 +39,6 @@ import com.isseiaoki.simplecropview.callback.CropCallback;
 import com.isseiaoki.simplecropview.callback.LoadCallback;
 import com.isseiaoki.simplecropview.callback.SaveCallback;
 import com.x.memories.models.Post;
-import com.x.memories.reusables.Utilities;
-
-import java.io.InputStream;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -49,21 +48,21 @@ public class PreviewActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     Context context;
     private CropImageView preview;
-    private Uri imageUri, saveUri;
+    private Uri imageUri;
     private String time;
-    InputStream imageStream;
-    Bitmap bmp, rotatedBitmap, scaled;
     Button send_btn;
     EditText caption_box;
     String uid, localtime;
     Boolean privacy = false;
+    SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_preview);
-
+        context = this;
+        preferences = PreferenceManager.getDefaultSharedPreferences(context);
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -81,7 +80,6 @@ public class PreviewActivity extends AppCompatActivity {
 
         };
 
-        context = this;
         imageUri= Uri.parse(getIntent().getExtras().getString("image_uri"));
         time = getIntent().getStringExtra("time");
         preview = (CropImageView) findViewById(R.id.preview);
@@ -172,10 +170,6 @@ public class PreviewActivity extends AppCompatActivity {
     }
 
     private void upload(Bitmap bmp) {
-
-//            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-//            bmp.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-//            byte[] byteArray = stream.toByteArray();
             String path = MediaStore.Images.Media.insertImage(getContentResolver(), bmp, null, null);
             Uri compressedUri =  Uri.parse(path);
             final ProgressDialog progressDialog = ProgressDialog.show(context,null,"Posting your moment...",false,false);
@@ -196,20 +190,16 @@ public class PreviewActivity extends AppCompatActivity {
                             Toast.makeText(context, "Something went wrong somewhere. Please try again", Toast.LENGTH_SHORT).show();
                         }
                     });
-//            try {
-//                stream.close();
-//                stream = null;
-//            } catch (IOException e) {e.printStackTrace();}
-
     }
 
     private void postToFirebase(String photoUrl, final ProgressDialog progressDialog) {
 
-        localtime = Utilities.getTime();
+//        localtime = Utilities.getTime();
+        localtime = String.valueOf(System.currentTimeMillis());
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference();
-        Post post = new Post(photoUrl,privacy,uid,localtime,caption_box.getText().toString());
+        Post post = new Post(photoUrl,privacy,uid,localtime,preferences.getString("LOGGEDIN_NAME","Someone")+"\n"+caption_box.getText().toString());
         myRef.child("photos").child(uid+"_"+localtime).setValue(post, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
