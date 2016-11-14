@@ -44,7 +44,6 @@ public class SplashScreen extends AppCompatActivity {
     SharedPreferences.Editor editor;
     AppCompatButton signin_btn;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +65,8 @@ public class SplashScreen extends AppCompatActivity {
                     editor.putBoolean("Moments_signin",true);
                     editor.apply();
 
+                    signin_btn.setVisibility(View.INVISIBLE);
+
                     //Start notification service
                     Intent myIntent = new Intent(context, NotificationService.class);
                     context.startService(myIntent);
@@ -79,7 +80,7 @@ public class SplashScreen extends AppCompatActivity {
                     editor.putString("LOGGEDIN_NAME","");
                     editor.apply();
                     Log.d("Memories", "onAuthStateChanged:signed_out");
-
+                    signin_btn.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -100,11 +101,11 @@ public class SplashScreen extends AppCompatActivity {
             }
         });
 
-        //Start timer
-        if(preferences.getBoolean("Moments_signin",false)){
-            signin_btn.setVisibility(View.INVISIBLE);
-            startTimer();
-        }
+//        //Start timer
+//        if(preferences.getBoolean("Moments_signin",false)){
+//            signin_btn.setVisibility(View.INVISIBLE);
+//            startTimer();
+//        }
     }
 
     private void showSignIn() {
@@ -293,7 +294,6 @@ public class SplashScreen extends AppCompatActivity {
             mAuth.removeAuthStateListener(mAuthListener);
         }
     }
-
 
     @Override
     protected void attachBaseContext(Context newBase) {

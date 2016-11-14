@@ -1,5 +1,6 @@
 package com.x.memories;
 
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -64,6 +65,10 @@ public class Requests extends AppCompatActivity {
         assert getSupportActionBar()!= null;
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Permission requests");
+
+        //Dismiss notifications
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.cancel(0);
     }
 
     @Override

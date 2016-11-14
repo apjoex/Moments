@@ -70,8 +70,6 @@ public class PhotoFragment extends Fragment {
     ArrayList<Post> posts = new ArrayList<>();
     RelativeLayout photo_placeholder;
 
-
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -178,7 +176,7 @@ public class PhotoFragment extends Fragment {
 
                 layoutManager = new GridLayoutManager(context,3);
                 photo_list.setLayoutManager(layoutManager);
-                adapter = new FeedsAdapter(context,posts,1,photo_list,false);
+                adapter = new FeedsAdapter(context,posts,1);
                 adapter.setHasStableIds(true);
                 photo_list.setAdapter(adapter);
 

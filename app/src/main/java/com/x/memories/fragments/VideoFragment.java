@@ -166,7 +166,7 @@ public class VideoFragment extends Fragment {
 
                 layoutManager = new LinearLayoutManager(context);
                 video_list.setLayoutManager(layoutManager);
-                adapter = new FeedsAdapter(context,posts,2, video_list, false);
+                adapter = new FeedsAdapter(context,posts,2);
                 video_list.setAdapter(adapter);
 
 

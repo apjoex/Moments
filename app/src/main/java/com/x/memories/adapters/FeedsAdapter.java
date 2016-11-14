@@ -47,8 +47,7 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
     private Context context;
     private int type;
 
-
-    public FeedsAdapter(Context context, ArrayList<Post> posts, int type, RecyclerView photo_list, Boolean expanded) {
+    public FeedsAdapter(Context context, ArrayList<Post> posts, int type) {
         this.context = context;
         this.posts = posts;
         this.type = type;
@@ -112,7 +111,7 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
         }else{
             //For videos
             holder.caption.setText(posts.get(position).getCaption());
-            if(posts.get(position).getPrivacy()){
+            if(posts.get(position).getPrivacy() && !posts.get(position).getUid().equals(preferences.getString("LOGGEDIN_UID",""))){
                 holder.privacy_logo.setVisibility(View.VISIBLE);
             }else {
                 holder.privacy_logo.setVisibility(View.INVISIBLE);
@@ -122,6 +121,7 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
                 @Override
                 public void onClick(View view) {
                     if(posts.get(position).getPrivacy()  && !posts.get(position).getUid().equals(preferences.getString("LOGGEDIN_UID",""))){
+                        //Private video
                         AlertDialog dialog = new AlertDialog.Builder(context)
                                 .setTitle("Private moment")
                                 .setMessage("This is a private moment. You need permission to view this moment.")
@@ -148,6 +148,7 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
                                 }).create();
                         dialog.show();
                     }else{
+                        //Public video
                         Intent intent = new Intent(context, VideoPlay.class);
                         intent.putExtra("video_url",posts.get(position).getUrl());
                         context.startActivity(intent);

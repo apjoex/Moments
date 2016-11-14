@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -20,6 +21,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -29,6 +31,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -63,6 +66,7 @@ public class SlideShowDialogFragment extends DialogFragment {
     ViewPager viewPager;
     private int selectedPosition = 0;
     private MyViewPagerAdapter myViewPagerAdapter;
+    SharedPreferences preferences;
 
     public static SlideShowDialogFragment newInstance(){
         return new SlideShowDialogFragment();
@@ -77,6 +81,35 @@ public class SlideShowDialogFragment extends DialogFragment {
         myViewPagerAdapter = new MyViewPagerAdapter();
         viewPager.setAdapter(myViewPagerAdapter);
         viewPager.addOnPageChangeListener(viewPagerPageChangeListener);
+
+        final RelativeLayout tut_holder = (RelativeLayout)v.findViewById(R.id.tut_holder);
+        final ScaleGestureDetector mScaleDetector = new ScaleGestureDetector(getActivity(), new MyPinchListener());
+        tut_holder.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                mScaleDetector.onTouchEvent(event);
+                return true;
+            }
+        });
+
+        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        if(preferences.getBoolean("tutorial",false)){
+            tut_holder.setVisibility(View.GONE);
+        }
+
+        AppCompatButton got_btn = (AppCompatButton)v.findViewById(R.id.got_btn);
+        ColorStateList stateList =  ColorStateList.valueOf(Color.rgb(0,151,214));
+        got_btn.setSupportBackgroundTintList(stateList);
+        got_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tut_holder.setVisibility(View.GONE);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putBoolean("tutorial",true);
+                editor.apply();
+            }
+        });
+
 
         setCurrentItem(selectedPosition);
 
@@ -138,6 +171,18 @@ public class SlideShowDialogFragment extends DialogFragment {
                     Toast.makeText(getActivity(),"Please grant permissions to save moments",Toast.LENGTH_SHORT).show();
                 }
             }
+        }
+    }
+
+    private class MyPinchListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            Log.d("TAG", "PINCH! OUCH!");
+            Log.d("SCATE FACTOR", ""+detector.getScaleFactor());
+//            if(detector.getScaleFactor() < 0.90){
+//                removeFragment(SlideShowDialogFragment.this);
+//            }
+            return true;
         }
     }
 

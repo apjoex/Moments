@@ -8,8 +8,8 @@ android {
         applicationId "com.x.memories"
         minSdkVersion 17
         targetSdkVersion 24
-        versionCode 2
-        versionName "0.1.1.beta"
+        versionCode 3
+        versionName "0.1.2.beta"
     }
     buildTypes {
         release {
