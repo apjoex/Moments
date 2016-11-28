@@ -66,9 +66,6 @@ public class GrantedRequests extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Granted requests");
 
-        //Dismiss notifications
-        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.cancel(1);
     }
 
     @Override
@@ -103,6 +100,10 @@ public class GrantedRequests extends AppCompatActivity {
         });
         checkList();
         registerReceiver(deleteReceiver, new IntentFilter("LISTENER"));
+
+        //Dismiss notifications
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.cancel(1);
     }
 
     private BroadcastReceiver deleteReceiver = new BroadcastReceiver() {

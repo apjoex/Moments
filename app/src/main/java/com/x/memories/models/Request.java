@@ -7,7 +7,15 @@ import java.io.Serializable;
  */
 public class Request implements Serializable {
 
-    public Request(String name, String uid, String time, String post_type, String status, String post_id, String caption) {
+    public String getBitmapString() {
+        return bitmapString;
+    }
+
+    public void setBitmapString(String bitmapString) {
+        this.bitmapString = bitmapString;
+    }
+
+    public Request(String name, String uid, String time, String post_type, String status, String post_id, String caption, String bitmapString) {
         this.name = name;
         this.uid = uid;
         this.time = time;
@@ -15,6 +23,8 @@ public class Request implements Serializable {
         this.status = status;
         this.post_id = post_id;
         this.caption = caption;
+        this.bitmapString = bitmapString;
+
     }
 
     public Request() {
@@ -26,6 +36,7 @@ public class Request implements Serializable {
     public String status;
     public String time;
     public String uid;
+    public String bitmapString;
 
     public String getCaption() {
         return caption;

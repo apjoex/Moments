@@ -163,13 +163,7 @@ public class Home extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_home, menu);
-        String title;
-        if(preferences.getString("LOGGEDIN_NAME","Profile") == ""){
-            title = "Profile";
-        }else{
-            title = preferences.getString("LOGGEDIN_NAME","Profile");
-        }
-        menu.getItem(0).setTitle(title);
+        menu.getItem(0).setTitle(preferences.getString("LOGGEDIN_NAME","Profile").equals("")?"Profile":preferences.getString("LOGGEDIN_NAME","Profile"));
         return true;
     }
 

@@ -5,9 +5,15 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -29,11 +35,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.x.memories.R;
 import com.x.memories.VideoPlay;
+import com.x.memories.fragments.SlideShowDialogFragment;
 import com.x.memories.models.Post;
 import com.x.memories.models.Request;
 import com.x.memories.reusables.Utilities;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.CropSquareTransformation;
@@ -108,6 +116,78 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
                                 .into(holder.thumbnail);
                     }
                 }
+
+            holder.thumbnail.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(posts.get(position).getPrivacy() && !posts.get(position).getUid().equals(preferences.getString("LOGGEDIN_UID",""))){
+                        AlertDialog dialog = new AlertDialog.Builder(context)
+                                .setTitle("Private moment")
+                                .setMessage("This is a private moment. You need permission to view this moment.")
+                                .setPositiveButton("REQUEST PERMISSION", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        final ProgressDialog progressDialog = ProgressDialog.show(context, null, "Requesting...", false, false);
+                                        new AsyncTask<String, Void, Bitmap>() {
+                                            @Override
+                                            protected void onPreExecute() {
+                                                super.onPreExecute();
+                                            }
+
+                                            @Override
+                                            protected Bitmap doInBackground(String... strings) {
+                                                try {
+                                                    return Glide.with(context)
+                                                            .load(posts.get(position).getUrl())
+                                                            .asBitmap()
+                                                            .centerCrop()
+                                                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                                                            .into(400, 400) // Width and height
+                                                            .get();
+                                                } catch (ExecutionException | InterruptedException e) {
+                                                    e.printStackTrace();
+                                                }
+                                                return null;
+                                            }
+                                        @Override
+                                        protected void onPostExecute(Bitmap result) {
+                                            super.onPostExecute(result);
+                                            try {
+                                                Log.d("WEARABLE","Gobe no dey");
+                                                Request request = new Request(preferences.getString("LOGGEDIN_NAME","Someone"),preferences.getString("LOGGEDIN_UID",""), Utilities.getTime(),"photo","sent",posts.get(position).getUrl(),posts.get(position).getCaption(),Utilities.BitMapToString(result));
+                                                FirebaseDatabase.getInstance().getReference().child("notifications").child(posts.get(position).getUid()).child(request.getUid()+"_"+request.getTime()).setValue(request, new DatabaseReference.CompletionListener() {
+                                                    @Override
+                                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                                        Toast.makeText(context,"Request sent. You'll get notified when you are granted permission to view the moment",Toast.LENGTH_SHORT).show();
+                                                        if(progressDialog.isShowing()){ progressDialog.dismiss(); }
+                                                    }
+                                                });
+                                            } catch (Exception e) {
+                                                Log.d("WEARABLE","Gobe dey");
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                        }.execute();
+                                    }
+                                }).setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        dialogInterface.dismiss();
+                                    }
+                                }).create();
+                        dialog.show();
+                    }else{
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("posts", posts);
+                        bundle.putInt("position", position);
+
+                        FragmentTransaction ft = ((AppCompatActivity) context).getSupportFragmentManager().beginTransaction();
+                        SlideShowDialogFragment newFragment = SlideShowDialogFragment.newInstance();
+                        newFragment.setArguments(bundle);
+                        newFragment.show(ft, "slideshow");
+                    }
+                }
+            });
         }else{
             //For videos
             holder.caption.setText(posts.get(position).getCaption());
@@ -129,7 +209,7 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
                                         final ProgressDialog progressDialog = ProgressDialog.show(context, null, "Requesting...", false, false);
-                                        Request request = new Request(preferences.getString("LOGGEDIN_NAME","Someone"),preferences.getString("LOGGEDIN_UID",""), Utilities.getTime(),"video","sent",posts.get(position).getUrl(),posts.get(position).getCaption());
+                                        Request request = new Request(preferences.getString("LOGGEDIN_NAME","Someone"),preferences.getString("LOGGEDIN_UID",""), Utilities.getTime(),"video","sent",posts.get(position).getUrl(),posts.get(position).getCaption(),"");
                                         FirebaseDatabase.getInstance().getReference().child("notifications").child(posts.get(position).getUid()).child(request.getUid()+"_"+request.getTime()).setValue(request, new DatabaseReference.CompletionListener() {
                                             @Override
                                             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {

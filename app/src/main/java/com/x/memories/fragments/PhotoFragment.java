@@ -1,9 +1,7 @@
 package com.x.memories.fragments;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -18,9 +16,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -35,7 +31,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
@@ -43,8 +38,6 @@ import com.x.memories.PreviewActivity;
 import com.x.memories.R;
 import com.x.memories.adapters.FeedsAdapter;
 import com.x.memories.models.Post;
-import com.x.memories.models.Request;
-import com.x.memories.reusables.Utilities;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -179,53 +172,18 @@ public class PhotoFragment extends Fragment {
                 adapter = new FeedsAdapter(context,posts,1);
                 adapter.setHasStableIds(true);
                 photo_list.setAdapter(adapter);
-
-                photo_list.addOnItemTouchListener(new FeedsAdapter.RecyclerTouchListener(context, photo_list, new FeedsAdapter.ClickListener() {
-                    @Override
-                    public void onClick(View view, final int position) {
-
-                        if(posts.get(position).getPrivacy() && !posts.get(position).getUid().equals(preferences.getString("LOGGEDIN_UID",""))){
-                            AlertDialog dialog = new AlertDialog.Builder(context)
-                                    .setTitle("Private moment")
-                                    .setMessage("This is a private moment. You need permission to view this moment.")
-                                    .setPositiveButton("REQUEST PERMISSION", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-
-                                            final ProgressDialog progressDialog = ProgressDialog.show(context, null, "Requesting...", false, false);
-                                            Request request = new Request(preferences.getString("LOGGEDIN_NAME","Someone"),preferences.getString("LOGGEDIN_UID",""), Utilities.getTime(),"photo","sent",posts.get(position).getUrl(),posts.get(position).getCaption());
-                                            FirebaseDatabase.getInstance().getReference().child("notifications").child(posts.get(position).getUid()).child(request.getUid()+"_"+request.getTime()).setValue(request, new DatabaseReference.CompletionListener() {
-                                                @Override
-                                                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                                    Toast.makeText(context,"Request sent. You'll get notified when you are granted permission to view the moment",Toast.LENGTH_SHORT).show();
-                                                    if(progressDialog.isShowing()){ progressDialog.dismiss(); }
-                                                }
-                                            });
-                                        }
-                                    }).setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            dialogInterface.dismiss();
-                                        }
-                                    }).create();
-                            dialog.show();
-                        }else{
-                            Bundle bundle = new Bundle();
-                            bundle.putSerializable("posts", posts);
-                            bundle.putInt("position", position);
-
-                            FragmentTransaction ft = getFragmentManager().beginTransaction();
-                            SlideShowDialogFragment newFragment = SlideShowDialogFragment.newInstance();
-                            newFragment.setArguments(bundle);
-                            newFragment.show(ft, "slideshow");
-                        }
-                    }
-
-                    @Override
-                    public void onLongClick(View view, int position) {
-
-                    }
-                }));
+//                photo_list.addOnItemTouchListener(new FeedsAdapter.RecyclerTouchListener(context, photo_list, new FeedsAdapter.ClickListener() {
+//                    @Override
+//                    public void onClick(View view, final int position) {
+//
+//
+//                    }
+//
+//                    @Override
+//                    public void onLongClick(View view, int position) {
+//
+//                    }
+//                }));
 
 
                 //Hide loading screen

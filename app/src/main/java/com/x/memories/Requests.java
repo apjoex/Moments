@@ -1,6 +1,7 @@
 package com.x.memories;
 
 import android.app.NotificationManager;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,14 +18,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.x.memories.adapters.RequestAdapter;
 import com.x.memories.models.Request;
+import com.x.memories.reusables.Utilities;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,13 +45,14 @@ public class Requests extends AppCompatActivity {
     RecyclerView.LayoutManager layoutManager;
     RecyclerView request_list;
     RelativeLayout request_placeholder;
+    String action = "demo";
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_requests);
         context = this;
-
         request_list = (RecyclerView)findViewById(R.id.request_list);
         request_placeholder = (RelativeLayout)findViewById(R.id.request_placeholder);
 
@@ -66,14 +71,23 @@ public class Requests extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Permission requests");
 
-        //Dismiss notifications
-        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.cancel(0);
+        Intent intent = getIntent();
+        // Get the extras (if there are any)
+        Bundle extras = intent.getExtras();
+        if (extras != null) {
+            Log.d("MOMENTS_intent",extras.getString("action"));
+            action = extras.getString("action");
+        }else{
+            Log.d("MOMENTS_intent","nothing");
+        }
+        Log.d("MOMENTS_ACTION",action);
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
         notfRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -93,7 +107,7 @@ public class Requests extends AppCompatActivity {
                     showRequests(requests);
                 }
 
-                Log.d("FirebaseNotify",dataSnapshot.toString());
+//                Log.d("FirebaseNotify",dataSnapshot.toString());
             }
 
             @Override
@@ -103,6 +117,24 @@ public class Requests extends AppCompatActivity {
         });
         checkList();
         registerReceiver(deleteReceiver, new IntentFilter("LISTENER"));
+
+        //Dismiss notifications
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.cancel(0);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        action = "demo";
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(progressDialog!= null){
+            progressDialog.dismiss();
+        }
     }
 
     private void showRequests(ArrayList<Request> requests) {
@@ -114,13 +146,61 @@ public class Requests extends AppCompatActivity {
         adapter = new RequestAdapter(context,requests,"pending");
         request_list.setAdapter(adapter);
 
-
         //Hide loading screen
         if(request_placeholder.isShown()){
             request_placeholder.setVisibility(View.INVISIBLE);
         }
 
+        if(action.equals("accept")){
+            acceptRequest(0);
+        }else if(action.equals("decline")){
+            declineRequest(0);
+        }
     }
+
+    private void declineRequest(int position) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+        String uid = sharedPref.getString("LOGGEDIN_UID", "");
+        progressDialog = ProgressDialog.show(context, null, "Declining request...", false, false);
+        FirebaseDatabase.getInstance().getReference().child("notifications").child(uid).child(requests.get(position).getUid()+"_"+requests.get(position).getTime()).setValue(null, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                Toast.makeText(context,"Request declined successfully",Toast.LENGTH_SHORT).show();
+                if(progressDialog.isShowing()){ progressDialog.dismiss(); }
+                adapter.notifyDataSetChanged();
+                checkList();
+                action = "demo";
+            }
+        });
+
+    }
+
+    private void acceptRequest(final int position) {
+        progressDialog = ProgressDialog.show(context, null, "Accepting request...", false, false);
+        Request request = new Request(requests.get(position).name,requests.get(position).getUid(), Utilities.getTime(),"photo","accepted",requests.get(position).getPost_id(),requests.get(position).getCaption(),requests.get(position).getBitmapString());
+        FirebaseDatabase.getInstance().getReference().child("notifications").child(requests.get(position).getUid()).child(requests.get(position).getUid()+"_"+Utilities.getTime()).setValue(request, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+
+                SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+                String uid = sharedPref.getString("LOGGEDIN_UID", "");
+                FirebaseDatabase.getInstance().getReference().child("notifications").child(uid).child(requests.get(position).getUid()+"_"+requests.get(position).getTime()).setValue(null, new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                        Toast.makeText(context, "Request accepted", Toast.LENGTH_SHORT).show();
+                        if (progressDialog.isShowing()) {progressDialog.dismiss();}
+                        adapter.notifyDataSetChanged();
+                        checkList();
+                        action = "demo";
+                    }
+                });
+
+            }
+        });
+    }
+
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

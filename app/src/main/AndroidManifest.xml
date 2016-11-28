@@ -36,7 +36,6 @@
         <activity
             android:name=".Requests"
             android:screenOrientation="portrait" />
-
         <receiver
             android:name=".receivers.BootUpReceiver"
             android:enabled="true"
@@ -47,19 +46,18 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
-
         <service
             android:name=".services.NotificationService"
             android:enabled="true"
             android:exported="false" />
-
         <activity
             android:name=".VideoPlay"
             android:theme="@style/AppThemeBlue" />
         <activity
             android:name=".GrantedRequests"
             android:screenOrientation="portrait" />
-        <activity android:name=".GrantedView"
+        <activity
+            android:name=".GrantedView"
             android:theme="@style/AppThemeBlue"/>
     </application>
 

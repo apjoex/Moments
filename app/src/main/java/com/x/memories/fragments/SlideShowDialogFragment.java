@@ -10,6 +10,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -53,6 +55,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
 
@@ -221,8 +224,51 @@ public class SlideShowDialogFragment extends DialogFragment {
             request_btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+
                     final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), null, "Requesting...", false, false);
-                    Request request = new Request(preferences.getString("LOGGEDIN_NAME","Someone"),preferences.getString("LOGGEDIN_UID",""), Utilities.getTime(),"photo","sent",posts.get(position).getUrl(),posts.get(position).getCaption());
+                    new AsyncTask<String, Void, Bitmap>() {
+                        @Override
+                        protected void onPreExecute() {
+                            super.onPreExecute();
+                        }
+
+                        @Override
+                        protected Bitmap doInBackground(String... strings) {
+                            try {
+                                return Glide.with(getActivity())
+                                        .load(posts.get(position).getUrl())
+                                        .asBitmap()
+                                        .centerCrop()
+                                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                                        .into(400, 400) // Width and height
+                                        .get();
+                            } catch (ExecutionException | InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            return null;
+                        }
+                        @Override
+                        protected void onPostExecute(Bitmap result) {
+                            super.onPostExecute(result);
+                            try {
+                                Log.d("WEARABLE","Gobe no dey");
+                                Request request = new Request(preferences.getString("LOGGEDIN_NAME","Someone"),preferences.getString("LOGGEDIN_UID",""), Utilities.getTime(),"photo","sent",posts.get(position).getUrl(),posts.get(position).getCaption(),Utilities.BitMapToString(result));
+                                FirebaseDatabase.getInstance().getReference().child("notifications").child(posts.get(position).getUid()).child(request.getUid()+"_"+request.getTime()).setValue(request, new DatabaseReference.CompletionListener() {
+                                    @Override
+                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                        Toast.makeText(getActivity(),"Request sent. You'll get notified when you are granted permission to view the moment",Toast.LENGTH_SHORT).show();
+                                        if(progressDialog.isShowing()){ progressDialog.dismiss(); }
+                                    }
+                                });
+                            } catch (Exception e) {
+                                Log.d("WEARABLE","Gobe dey");
+                                e.printStackTrace();
+                            }
+                        }
+                    }.execute();
+
+
+                    Request request = new Request(preferences.getString("LOGGEDIN_NAME","Someone"),preferences.getString("LOGGEDIN_UID",""), Utilities.getTime(),"photo","sent",posts.get(position).getUrl(),posts.get(position).getCaption(),Utilities.BitMapToString(((BitmapDrawable)imageViewPreview.getDrawable()).getBitmap()));
                     FirebaseDatabase.getInstance().getReference().child("notifications").child(posts.get(position).getUid()).child(request.getUid()+"_"+request.getTime()).setValue(request, new DatabaseReference.CompletionListener() {
                         @Override
                         public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {

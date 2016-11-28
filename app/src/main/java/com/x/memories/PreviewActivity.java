@@ -199,7 +199,7 @@ public class PreviewActivity extends AppCompatActivity {
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference();
-        Post post = new Post(photoUrl,privacy,uid,localtime,preferences.getString("LOGGEDIN_NAME","Someone")+"\n"+caption_box.getText().toString());
+        Post post = new Post(photoUrl,privacy,uid,localtime,"Posted by "+preferences.getString("LOGGEDIN_NAME","Someone")+"\n"+caption_box.getText().toString());
         myRef.child("photos").child(uid+"_"+localtime).setValue(post, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {

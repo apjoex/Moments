@@ -50,7 +50,7 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.ViewHold
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, final int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
 
         holder.setIsRecyclable(false);
 
@@ -73,7 +73,7 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.ViewHold
                     public void onClick(View view) {
 
                         final ProgressDialog progressDialog = ProgressDialog.show(context, null, "Accepting request...", false, false);
-                        Request request = new Request(requests.get(position).name,requests.get(position).getUid(), Utilities.getTime(),"photo","accepted",requests.get(position).getPost_id(),requests.get(position).getCaption());
+                        Request request = new Request(requests.get(position).name,requests.get(position).getUid(), Utilities.getTime(),"photo","accepted",requests.get(position).getPost_id(),requests.get(position).getCaption(), requests.get(position).getBitmapString());
                         FirebaseDatabase.getInstance().getReference().child("notifications").child(requests.get(position).getUid()).child(requests.get(position).getUid()+"_"+Utilities.getTime()).setValue(request, new DatabaseReference.CompletionListener() {
                             @Override
                             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
@@ -109,7 +109,7 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.ViewHold
                     public void onClick(View view) {
 
                         final ProgressDialog progressDialog = ProgressDialog.show(context, null, "Accepting request...", false, false);
-                        Request request = new Request(requests.get(position).name,requests.get(position).getUid(), Utilities.getTime(),"video","accepted",requests.get(position).getPost_id(),requests.get(position).getCaption());
+                        Request request = new Request(requests.get(position).name,requests.get(position).getUid(), Utilities.getTime(),"video","accepted",requests.get(position).getPost_id(),requests.get(position).getCaption(),"");
                         FirebaseDatabase.getInstance().getReference().child("notifications").child(requests.get(position).getUid()).child(requests.get(position).getUid()+"_"+Utilities.getTime()).setValue(request, new DatabaseReference.CompletionListener() {
                             @Override
                             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
