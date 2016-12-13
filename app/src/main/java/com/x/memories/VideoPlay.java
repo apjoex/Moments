@@ -21,7 +21,6 @@ public class VideoPlay extends AppCompatActivity {
     Uri vidUri;
     ProgressBar loading;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,6 +32,7 @@ public class VideoPlay extends AppCompatActivity {
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
         getSupportActionBar().setTitle("");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_white);
 
         vidView = (VideoView)findViewById(R.id.myVideo);
         loading = (ProgressBar)findViewById(R.id.loadingbar);

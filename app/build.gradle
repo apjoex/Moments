@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.0"
+    compileSdkVersion 25
+    buildToolsVersion "25.0.1"
 
     defaultConfig {
         applicationId "com.x.memories"
         minSdkVersion 17
-        targetSdkVersion 24
+        targetSdkVersion 25
         versionCode 3
         versionName "0.1.2.beta"
     }
@@ -22,12 +22,12 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:24.2.0'
+    compile 'com.android.support:appcompat-v7:25.0.1'
     compile 'com.roughike:bottom-bar:2.0.2'
-    compile 'com.android.support:support-v4:24.2.0'
-    compile 'com.android.support:recyclerview-v7:24.2.0'
+    compile 'com.android.support:support-v4:25.0.1'
+    compile 'com.android.support:recyclerview-v7:25.0.1'
     compile 'com.google.code.gson:gson:2.4'
-    compile 'com.android.support:design:24.2.0'
+    compile 'com.android.support:design:25.0.1'
     compile 'com.google.firebase:firebase-auth:9.4.0'
     compile 'com.google.firebase:firebase-database:9.4.0'
     compile 'com.google.firebase:firebase-storage:9.4.0'
@@ -35,6 +35,7 @@ dependencies {
     compile 'com.isseiaoki:simplecropview:1.1.4'
     compile 'uk.co.chrisjenx:calligraphy:2.2.0'
     compile 'com.firebase:geofire-android:2.1.1'
+    compile 'com.google.android.gms:play-services-location:9.4.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

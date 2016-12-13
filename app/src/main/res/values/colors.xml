@@ -5,4 +5,5 @@
     <color name="colorAccent">#0097d6</color>
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorBlackTransparent">#64000000</color>
+    <color name="dialog_background_color">#aaa</color>
 </resources>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_create_event"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.x.memories.CreateEvent">
+
+    <ImageView
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/ic_event_full"
+        android:layout_marginRight="-40dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:tint="#cfd5d7"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_marginTop="15dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Event name"
+                android:inputType="text"
+                android:backgroundTint="@color/colorPrimaryDark"
+                android:id="@+id/event_name"/>
+
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_marginTop="15dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Event description"
+                android:inputType="textMultiLine"
+                android:maxLength="140"
+                android:backgroundTint="@color/colorPrimaryDark"
+                android:id="@+id/event_description"/>
+
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.v7.widget.SwitchCompat
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#111"
+            android:id="@+id/switcher"
+            android:paddingLeft="5dp"
+            android:text="PROTECTED EVENT   "
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_marginTop="15dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="5dp"
+            android:text="*A passcode will be required to join protected events"/>
+
+        <Button
+            android:text="CREATE"
+            android:layout_width="wrap_content"
+            android:layout_marginTop="35dp"
+            android:layout_marginLeft="5dp"
+            android:layout_height="40dp"
+            android:id="@+id/create_btn" />
+
+
+    </LinearLayout>
+
+</RelativeLayout>

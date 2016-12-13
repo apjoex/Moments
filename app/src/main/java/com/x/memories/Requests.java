@@ -17,7 +17,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -44,7 +44,7 @@ public class Requests extends AppCompatActivity {
     RecyclerView.Adapter adapter;
     RecyclerView.LayoutManager layoutManager;
     RecyclerView request_list;
-    RelativeLayout request_placeholder;
+    LinearLayout request_placeholder;
     String action = "demo";
     ProgressDialog progressDialog;
 
@@ -54,7 +54,7 @@ public class Requests extends AppCompatActivity {
         setContentView(R.layout.activity_requests);
         context = this;
         request_list = (RecyclerView)findViewById(R.id.request_list);
-        request_placeholder = (RelativeLayout)findViewById(R.id.request_placeholder);
+        request_placeholder = (LinearLayout)findViewById(R.id.request_placeholder);
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         String uid = sharedPref.getString("LOGGEDIN_UID", "");

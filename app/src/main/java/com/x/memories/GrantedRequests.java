@@ -15,7 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -34,7 +34,7 @@ public class GrantedRequests extends AppCompatActivity {
 
     Context context;
     RecyclerView granted_request_list;
-    RelativeLayout granted_placeholder;
+    LinearLayout granted_placeholder;
     FirebaseDatabase database;
     Query notfRef;
     ArrayList<Request> requests = new ArrayList<>();
@@ -49,7 +49,7 @@ public class GrantedRequests extends AppCompatActivity {
         context = this;
 
         granted_request_list = (RecyclerView)findViewById(R.id.granted_request_list);
-        granted_placeholder = (RelativeLayout)findViewById(R.id.granted_placeholder);
+        granted_placeholder = (LinearLayout)findViewById(R.id.granted_placeholder);
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         String uid = sharedPref.getString("LOGGEDIN_UID", "");

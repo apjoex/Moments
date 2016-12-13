@@ -20,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.firebase.geofire.GeoFire;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -29,6 +30,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
+import com.x.memories.fragments.EventFragment;
 import com.x.memories.fragments.PhotoFragment;
 import com.x.memories.fragments.VideoFragment;
 import com.x.memories.models.User;
@@ -43,7 +45,8 @@ public class Home extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseDatabase database;
     SharedPreferences preferences;
-
+    DatabaseReference ref;
+    GeoFire geoFire;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +55,8 @@ public class Home extends AppCompatActivity {
         context = this;
         mAuth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance();
+        ref = FirebaseDatabase.getInstance().getReference("geofire/photos");
+        geoFire = new GeoFire(ref);
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         //Set light status bar
@@ -125,11 +130,11 @@ public class Home extends AppCompatActivity {
                 }
 
                 //Favourite tab selected
-//                if (tabId == R.id.tab_fav) {
-//                    FragmentManager manager = getSupportFragmentManager();
-//                    FragmentTransaction transaction = manager.beginTransaction();
-//                    transaction.replace(R.id.contentContainer, new FavFragment()).commit();
-//                }
+                if (tabId == R.id.tab_event) {
+                    FragmentManager manager = getSupportFragmentManager();
+                    FragmentTransaction transaction = manager.beginTransaction();
+                    transaction.replace(R.id.contentContainer, new EventFragment()).commit();
+                }
             }
         });
 

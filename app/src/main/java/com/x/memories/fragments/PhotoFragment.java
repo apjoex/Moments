@@ -27,10 +27,12 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.firebase.geofire.GeoFire;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
@@ -62,6 +64,8 @@ public class PhotoFragment extends Fragment {
     RecyclerView photo_list;
     ArrayList<Post> posts = new ArrayList<>();
     RelativeLayout photo_placeholder;
+    DatabaseReference ref;
+    GeoFire geoFire;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -69,6 +73,8 @@ public class PhotoFragment extends Fragment {
         context = getActivity();
         database = FirebaseDatabase.getInstance();
         query = database.getReference("photos").orderByChild("time").limitToLast(100);
+        ref = FirebaseDatabase.getInstance().getReference("geofire/photos");
+        geoFire = new GeoFire(ref);
         mAuth = FirebaseAuth.getInstance();
         preferences  = PreferenceManager.getDefaultSharedPreferences(context);
 
@@ -106,17 +112,6 @@ public class PhotoFragment extends Fragment {
 
     }
 
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        showPhotos();
-////        if(posts.size() > 0){
-////            photo_placeholder.setVisibility(View.INVISIBLE);
-////        }else{
-////            photo_placeholder.setVisibility(View.VISIBLE);
-////        }
-//    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -124,7 +119,34 @@ public class PhotoFragment extends Fragment {
         add_btn = (FloatingActionButton)v.findViewById(R.id.add_photo_btn);
         photo_placeholder = (RelativeLayout)v.findViewById(R.id.photo_placeholder);
         photo_list = (RecyclerView)v.findViewById(R.id.photo_list);
+//        spinner = (Spinner) v.findViewById(R.id.spinner);
 
+//        // Spinner Drop down elements
+//        List<String> categories = new ArrayList<String>();
+//        categories.add("Worldwide");
+//        categories.add("Around you");
+
+//        // Spinner click listener
+//        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+//
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> adapterView) {
+//
+//            }
+//        });
+//
+//        // Creating adapter for spinner
+//        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, categories);
+//
+//        // attaching data adapter to spinner
+//        spinner.setAdapter(dataAdapter);
+//
+////        // Drop down layout style - list view with radio button
+////        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
         itemAnimator.setAddDuration(1000);
         itemAnimator.setRemoveDuration(1000);

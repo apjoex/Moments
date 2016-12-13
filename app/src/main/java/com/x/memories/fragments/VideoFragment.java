@@ -1,7 +1,8 @@
 package com.x.memories.fragments;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,6 +17,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -41,6 +43,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.x.memories.R;
@@ -48,13 +51,8 @@ import com.x.memories.adapters.FeedsAdapter;
 import com.x.memories.models.Post;
 
 import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
-import java.util.TimeZone;
 
 /**
  * Created by AKINDE-PETERS on 8/29/2016.
@@ -78,14 +76,15 @@ public class VideoFragment extends Fragment {
     ArrayList<Post> posts = new ArrayList<>();
     RelativeLayout video_placeholder;
     Boolean privacy = false;
-
+    NotificationManager notificationManager;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getActivity();
         database = FirebaseDatabase.getInstance();
-        query = database.getReference("videos").limitToLast(100);
+        notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        query = database.getReference("videos").orderByChild("time").limitToLast(50);
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -233,8 +232,8 @@ public class VideoFragment extends Fragment {
                         .setPositiveButton("POST", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                final ProgressDialog progressDialog = ProgressDialog.show(context,null,"Posting your moment...",false,false);
-                                postVideo(uri, captionText.getText().toString(), progressDialog);
+//                                final ProgressDialog progressDialog = ProgressDialog.show(context,null,"Posting your moment...",false,false);
+                                postVideo(uri, captionText.getText().toString());
                             }
                         }).setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
                             @Override
@@ -252,7 +251,19 @@ public class VideoFragment extends Fragment {
         }
     }
 
-    private void postVideo(Uri uri, final String caption, final ProgressDialog progressDialog) {
+    private void postVideo(Uri uri, final String caption) {
+        //Set notification information:
+        final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
+        notificationBuilder.setOngoing(true)
+                .setSmallIcon(R.drawable.ic_notify)
+                .setColor(getResources().getColor(R.color.colorPrimaryDark))
+                .setContentTitle("Posting your moment...")
+                .setProgress(100, 10, false);
+
+        //Send the notification:
+        final Notification[] notification = {notificationBuilder.build()};
+        notificationManager.notify(11, notification[0]);
+
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference imagesRef = storage.getReferenceFromUrl("gs://memories-ec966.appspot.com/").child("videos");
         imagesRef.child(time).putFile(uri)
@@ -260,25 +271,36 @@ public class VideoFragment extends Fragment {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                         String videoUrl = taskSnapshot.getDownloadUrl().toString();
-                        postToFirebase(videoUrl, caption, progressDialog);
+                        postToFirebase(videoUrl, caption);
+                    }
+                })
+                .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                        int progress = (int) (100 * (taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount()));
+                        notificationBuilder.setProgress(100, progress - 20, false)
+                                .setContentText(""+progress+"%");
+                        //Send the notification:
+                        notification[0] = notificationBuilder.build();
+                        notificationManager.notify(11, notification[0]);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception exception) {
-                        if(progressDialog.isShowing()) {progressDialog.dismiss();}
                         Toast.makeText(context, "Something went wrong somewhere. Please try again", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
-    private void postToFirebase(String videoUrl, String caption, final ProgressDialog progressDialog) {
+    private void postToFirebase(String videoUrl, String caption) {
 
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+1:00"));
-        Date currentLocalTime = cal.getTime();
-        DateFormat date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        date.setTimeZone(TimeZone.getTimeZone("GMT+1:00"));
-        localtime = date.format(currentLocalTime);
+//        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+1:00"));
+//        Date currentLocalTime = cal.getTime();
+//        DateFormat date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        date.setTimeZone(TimeZone.getTimeZone("GMT+1:00"));
+//        localtime = date.format(currentLocalTime);
+        localtime = String.valueOf(System.currentTimeMillis());
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference();
@@ -286,7 +308,7 @@ public class VideoFragment extends Fragment {
         myRef.child("videos").child(uid+"_"+localtime).setValue(post, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                if(progressDialog.isShowing()){ progressDialog.dismiss(); }
+                notificationManager.cancel(11);
                 if (databaseError != null) {
                     Toast.makeText(context, "Something went wrong somewhere. Please try again", Toast.LENGTH_SHORT).show();
                 } else {

@@ -4,11 +4,11 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-    <!--<uses-feature android:name="android.hardware.camera2" />-->
-
+    <!-- <uses-feature android:name="android.hardware.camera2" /> -->
     <application
         android:name=".controllers.AppController"
         android:allowBackup="true"
@@ -36,6 +36,7 @@
         <activity
             android:name=".Requests"
             android:screenOrientation="portrait" />
+
         <receiver
             android:name=".receivers.BootUpReceiver"
             android:enabled="true"
@@ -46,10 +47,16 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
+
         <service
             android:name=".services.NotificationService"
             android:enabled="true"
             android:exported="false" />
+        <service
+            android:name=".services.UploadService"
+            android:enabled="true"
+            android:exported="false" />
+
         <activity
             android:name=".VideoPlay"
             android:theme="@style/AppThemeBlue" />
@@ -58,7 +65,11 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".GrantedView"
-            android:theme="@style/AppThemeBlue"/>
+            android:theme="@style/AppThemeBlue" />
+        <activity
+            android:name=".DialogActivity"
+            android:theme="@style/AppTheme.Dialog" />
+        <activity android:name=".CreateEvent"></activity>
     </application>
 
 </manifest>
