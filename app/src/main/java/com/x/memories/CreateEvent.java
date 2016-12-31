@@ -5,16 +5,20 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -38,6 +42,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.gson.Gson;
 import com.x.memories.models.Event;
 
 import java.util.Random;
@@ -56,6 +61,7 @@ public class CreateEvent extends AppCompatActivity {
     ProgressDialog progressDialog;
     DatabaseReference ref;
     GeoFire geoFire;
+    CoordinatorLayout backGround;
 
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private GoogleApiClient mGoogleApiClient;
@@ -72,6 +78,7 @@ public class CreateEvent extends AppCompatActivity {
         priv_switch = (SwitchCompat)findViewById(R.id.switcher);
         name = (EditText)findViewById(R.id.event_name);
         description = (EditText)findViewById(R.id.event_description);
+        backGround = (CoordinatorLayout)findViewById(R.id.activity_create_event);
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
         ref = FirebaseDatabase.getInstance().getReference("geofire/events");
         geoFire = new GeoFire(ref);
@@ -181,12 +188,17 @@ public class CreateEvent extends AppCompatActivity {
                     if(protect){
                         Random ran = new Random();
                         code = (100000 + ran.nextInt(900000));
-                        Toast.makeText(context, ""+code, Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(context, ""+code, Toast.LENGTH_SHORT).show();
                     }else{
                         code = 0;
                     }
-                    
-                    postEvent();
+
+                    LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+                    if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+                        Toast.makeText(context, "Please turn on GPS on your device", Toast.LENGTH_SHORT).show();
+                    }else{
+                        postEvent();
+                    }
                 }
             }
         });
@@ -195,9 +207,9 @@ public class CreateEvent extends AppCompatActivity {
 
     private void postEvent() {
         progressDialog = ProgressDialog.show(context,null,"A moment please...",false,false);
-        String uid = preferences.getString("LOGGEDIN_UID", "");
-        String time = String.valueOf(System.currentTimeMillis());
-        Event event = new Event(uid+"_"+time,name.getText().toString(),description.getText().toString(),uid,time,protect,code);
+        final String uid = preferences.getString("LOGGEDIN_UID", "");
+        final String time = String.valueOf(System.currentTimeMillis());
+        final Event event = new Event(uid+"_"+time,name.getText().toString(),description.getText().toString(),uid,time,protect,code);
         geoFire.setLocation(event.getId(), new GeoLocation(currentLatitude, currentLongitude), new GeoFire.CompletionListener() {
             @Override
             public void onComplete(String key, DatabaseError error) {
@@ -215,15 +227,24 @@ public class CreateEvent extends AppCompatActivity {
                     Log.d("MOMENTS_SERVICE","Event created successful");
                     if(protect){
                         AlertDialog dialog = new AlertDialog.Builder(context)
-                                .setTitle("Passcode")
+                                .setTitle("Event Passcode")
+                                .setCancelable(false)
                                 .setMessage("The passcode for this event is "+code+". This passcode is required to join this event")
                                 .setPositiveButton("CONTINUE", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
                                         dialogInterface.dismiss();
+                                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                                        SharedPreferences.Editor editor = preferences.edit();
+                                        Gson gson = new Gson();
+                                        String event_details = gson.toJson(event);
+                                        editor.putString("Event_details",event_details);
+                                        editor.putBoolean("Event_active",true);
+                                        editor.apply();
+                                        finish();
                                     }
                                 })
-                                .setNegativeButton("COPY TO CLIPBOARD", new DialogInterface.OnClickListener() {
+                                .setNegativeButton("COPY PASSCODE TO CLIPBOARD", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
                                         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -231,13 +252,39 @@ public class CreateEvent extends AppCompatActivity {
                                         clipboard.setPrimaryClip(clip);
                                         Toast.makeText(context, "Copied to clipboard", Toast.LENGTH_SHORT).show();
                                         dialogInterface.dismiss();
+                                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                                        SharedPreferences.Editor editor = preferences.edit();
+                                        Gson gson = new Gson();
+                                        String event_details = gson.toJson(event);
+                                        editor.putString("Event_details",event_details);
+                                        editor.putBoolean("Event_active",true);
+                                        editor.apply();
                                         finish();
                                     }
                                 })
                                 .create();
                         dialog.show();
                     }else{
-                        finish();
+//                        name.setText("");
+//                        description.setText("");
+//                        Snackbar.make(backGround,"Event created successfully!",Snackbar.LENGTH_INDEFINITE).setAction("SHARE LINK", new View.OnClickListener() {
+//                            @Override
+//                            public void onClick(View view) {
+//                                Intent sendIntent = new Intent();
+//                                sendIntent.setAction(Intent.ACTION_SEND);
+//                                sendIntent.putExtra(Intent.EXTRA_TEXT, "http://moments.app/?event="+uid+"_"+time);
+//                                sendIntent.setType("text/plain");
+//                                startActivity(Intent.createChooser(sendIntent, "Share link to your event"));
+//                                finish();
+//                            }
+//                        }).show();
+                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                        SharedPreferences.Editor editor = preferences.edit();
+                        Gson gson = new Gson();
+                        String event_details = gson.toJson(event);
+                        editor.putString("Event_details",event_details);
+                        editor.putBoolean("Event_active",true);
+                        editor.apply();
                     }
                 }
             }

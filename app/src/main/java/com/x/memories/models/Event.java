@@ -1,10 +1,12 @@
 package com.x.memories.models;
 
+import java.io.Serializable;
+
 /**
  * Created by AKINDE-PETERS on 12/1/2016.
  */
 
-public class Event {
+public class Event implements Serializable {
 
     private String id;
     private String name;

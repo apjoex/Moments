@@ -1,10 +1,14 @@
 package com.x.memories.reusables;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
 import android.util.TypedValue;
+
+import com.google.gson.Gson;
+import com.x.memories.models.Event;
 
 import java.io.ByteArrayOutputStream;
 import java.text.DateFormat;
@@ -98,6 +102,14 @@ public class Utilities {
         bitmap.compress(Bitmap.CompressFormat.JPEG,100, baos);
         byte [] b=baos.toByteArray();
         return Base64.encodeToString(b, Base64.DEFAULT);
+    }
+
+
+    public static Event getCurrentEvent (SharedPreferences preferences) {
+        //Retrieve configuration
+        Gson gson = new Gson();
+        String data = preferences.getString("Event_details", "");
+        return gson.fromJson(data, Event.class);
     }
 
 }

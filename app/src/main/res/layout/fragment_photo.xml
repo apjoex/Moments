@@ -20,24 +20,35 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#fff"
+        android:gravity="center"
         android:id="@+id/photo_placeholder">
 
-    <ImageView
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:src="@drawable/photo_camera"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/imageView" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Go on, capture the moment "
-        android:layout_below="@+id/imageView"
-        android:layout_centerHorizontal="true" />
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:src="@drawable/photo_camera"
+                android:id="@+id/imageView" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Go on, capture the moment " />
+
+            <ProgressBar
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
+
+        </LinearLayout>
 
     </RelativeLayout>
 

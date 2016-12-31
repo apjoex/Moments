@@ -47,6 +47,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.x.memories.R;
+import com.x.memories.models.EventPost;
 import com.x.memories.models.Post;
 import com.x.memories.models.Request;
 import com.x.memories.reusables.Utilities;
@@ -66,6 +67,7 @@ import jp.wasabeef.glide.transformations.BlurTransformation;
 public class SlideShowDialogFragment extends DialogFragment {
 
     ArrayList<Post> posts;
+    ArrayList<EventPost> eventPosts;
     ViewPager viewPager;
     private int selectedPosition = 0;
     private MyViewPagerAdapter myViewPagerAdapter;
@@ -80,10 +82,10 @@ public class SlideShowDialogFragment extends DialogFragment {
         View v = inflater.inflate(R.layout.activity_photo_viewer, container, false);
         viewPager = (ViewPager) v.findViewById(R.id.pager);
         posts = (ArrayList<Post>) getArguments().getSerializable("posts");
+        eventPosts = (ArrayList<EventPost>) getArguments().getSerializable("event_posts");
         selectedPosition = getArguments().getInt("position");
         myViewPagerAdapter = new MyViewPagerAdapter();
         viewPager.setAdapter(myViewPagerAdapter);
-        viewPager.addOnPageChangeListener(viewPagerPageChangeListener);
 
         final RelativeLayout tut_holder = (RelativeLayout)v.findViewById(R.id.tut_holder);
         final ScaleGestureDetector mScaleDetector = new ScaleGestureDetector(getActivity(), new MyPinchListener());
@@ -121,33 +123,8 @@ public class SlideShowDialogFragment extends DialogFragment {
 
     private void setCurrentItem(int position) {
         viewPager.setCurrentItem(position, false);
-        displayMetaInfo(selectedPosition);
     }
 
-    //  page change listener
-    ViewPager.OnPageChangeListener viewPagerPageChangeListener = new ViewPager.OnPageChangeListener() {
-
-        @Override
-        public void onPageSelected(int position) {
-            displayMetaInfo(position);
-        }
-
-        @Override
-        public void onPageScrolled(int arg0, float arg1, int arg2) {
-        }
-
-        @Override
-        public void onPageScrollStateChanged(int arg0) {
-        }
-    };
-
-    private void displayMetaInfo(int position) {
-//        lblCount.setText((position + 1) + " of " + images.size());
-
-        Post post = posts.get(position);
-//        caption_text.setText(post.getCaption());
-//        lblDate.setText(image.getTimestamp());
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -213,113 +190,154 @@ public class SlideShowDialogFragment extends DialogFragment {
             favBtn.hide();
 
 
-            final Post post = posts.get(position);
-//
-//            Glide.with(getActivity()).load(post.getUrl())
-//                    .thumbnail(0.5f)
-//                    .crossFade()
-//                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-//                    .into(imageViewPreview);
+            if(posts != null){
+                final Post post = posts.get(position);
 
-            request_btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
+                request_btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
 
-                    final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), null, "Requesting...", false, false);
-                    new AsyncTask<String, Void, Bitmap>() {
-                        @Override
-                        protected void onPreExecute() {
-                            super.onPreExecute();
-                        }
-
-                        @Override
-                        protected Bitmap doInBackground(String... strings) {
-                            try {
-                                return Glide.with(getActivity())
-                                        .load(posts.get(position).getUrl())
-                                        .asBitmap()
-                                        .centerCrop()
-                                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                                        .into(400, 400) // Width and height
-                                        .get();
-                            } catch (ExecutionException | InterruptedException e) {
-                                e.printStackTrace();
+                        final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), null, "Requesting...", false, false);
+                        new AsyncTask<String, Void, Bitmap>() {
+                            @Override
+                            protected void onPreExecute() {
+                                super.onPreExecute();
                             }
-                            return null;
-                        }
-                        @Override
-                        protected void onPostExecute(Bitmap result) {
-                            super.onPostExecute(result);
-                            try {
-                                Log.d("WEARABLE","Gobe no dey");
-                                Request request = new Request(preferences.getString("LOGGEDIN_NAME","Someone"),preferences.getString("LOGGEDIN_UID",""), Utilities.getTime(),"photo","sent",posts.get(position).getUrl(),posts.get(position).getCaption(),Utilities.BitMapToString(result));
-                                FirebaseDatabase.getInstance().getReference().child("notifications").child(posts.get(position).getUid()).child(request.getUid()+"_"+request.getTime()).setValue(request, new DatabaseReference.CompletionListener() {
-                                    @Override
-                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                        Toast.makeText(getActivity(),"Request sent. You'll get notified when you are granted permission to view the moment",Toast.LENGTH_SHORT).show();
-                                        if(progressDialog.isShowing()){ progressDialog.dismiss(); }
-                                    }
-                                });
-                            } catch (Exception e) {
-                                Log.d("WEARABLE","Gobe dey");
-                                e.printStackTrace();
+
+                            @Override
+                            protected Bitmap doInBackground(String... strings) {
+                                try {
+                                    return Glide.with(getActivity())
+                                            .load(posts.get(position).getUrl())
+                                            .asBitmap()
+                                            .centerCrop()
+                                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                                            .into(400, 400) // Width and height
+                                            .get();
+                                } catch (ExecutionException | InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                return null;
                             }
-                        }
-                    }.execute();
+                            @Override
+                            protected void onPostExecute(Bitmap result) {
+                                super.onPostExecute(result);
+                                try {
+                                    Log.d("WEARABLE","Gobe no dey");
+                                    Request request = new Request(preferences.getString("LOGGEDIN_NAME","Someone"),preferences.getString("LOGGEDIN_UID",""), Utilities.getTime(),"photo","sent",posts.get(position).getUrl(),posts.get(position).getCaption(),Utilities.BitMapToString(result));
+                                    FirebaseDatabase.getInstance().getReference().child("notifications").child(posts.get(position).getUid()).child(request.getUid()+"_"+request.getTime()).setValue(request, new DatabaseReference.CompletionListener() {
+                                        @Override
+                                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                            Toast.makeText(getActivity(),"Request sent. You'll get notified when you are granted permission to view the moment",Toast.LENGTH_SHORT).show();
+                                            if(progressDialog.isShowing()){ progressDialog.dismiss(); }
+                                        }
+                                    });
+                                } catch (Exception e) {
+                                    Log.d("WEARABLE","Gobe dey");
+                                    e.printStackTrace();
+                                }
+                            }
+                        }.execute();
 
 
-                    Request request = new Request(preferences.getString("LOGGEDIN_NAME","Someone"),preferences.getString("LOGGEDIN_UID",""), Utilities.getTime(),"photo","sent",posts.get(position).getUrl(),posts.get(position).getCaption(),Utilities.BitMapToString(((BitmapDrawable)imageViewPreview.getDrawable()).getBitmap()));
-                    FirebaseDatabase.getInstance().getReference().child("notifications").child(posts.get(position).getUid()).child(request.getUid()+"_"+request.getTime()).setValue(request, new DatabaseReference.CompletionListener() {
-                        @Override
-                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                            Toast.makeText(getActivity(),"Request sent. You'll get notified when you are granted permission to view the moment",Toast.LENGTH_SHORT).show();
-                            if(progressDialog.isShowing()){ progressDialog.dismiss(); }
-                        }
-                    });
-                }
-            });
-
-            favBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-                    if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(getActivity(),
-                                new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                                10);
-                    }else{
-                        saveToInternalStorage(imageViewPreview,post.getTime());
+                        Request request = new Request(preferences.getString("LOGGEDIN_NAME","Someone"),preferences.getString("LOGGEDIN_UID",""), Utilities.getTime(),"photo","sent",posts.get(position).getUrl(),posts.get(position).getCaption(),Utilities.BitMapToString(((BitmapDrawable)imageViewPreview.getDrawable()).getBitmap()));
+                        FirebaseDatabase.getInstance().getReference().child("notifications").child(posts.get(position).getUid()).child(request.getUid()+"_"+request.getTime()).setValue(request, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                Toast.makeText(getActivity(),"Request sent. You'll get notified when you are granted permission to view the moment",Toast.LENGTH_SHORT).show();
+                                if(progressDialog.isShowing()){ progressDialog.dismiss(); }
+                            }
+                        });
                     }
+                });
+
+                favBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                            ActivityCompat.requestPermissions(getActivity(),
+                                    new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                    10);
+                        }else{
+                            saveToInternalStorage(imageViewPreview,post.getTime());
+                        }
+                    }
+                });
+
+                if(post.getPrivacy() && !posts.get(position).getUid().equals(preferences.getString("LOGGEDIN_UID",""))){
+                    request_btn.setVisibility(View.VISIBLE);
+                    captionText.setVisibility(View.INVISIBLE);
+                    Glide.with(getActivity())
+                            .load(post.getUrl())
+                            .crossFade()
+                            .bitmapTransform(new BlurTransformation(getActivity(),50))
+                            .listener(new RequestListener<String, GlideDrawable>() {
+                                          @Override
+                                          public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                                              return false;
+                                          }
+
+                                          @Override
+                                          public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                                              favBtn.hide();
+                                              loadingBar.setVisibility(View.GONE);
+                                              return false;
+                                          }
+                                      }
+                            )
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .into(imageViewPreview);
+                }else{
+                    request_btn.setVisibility(View.INVISIBLE);
+                    captionText.setVisibility(View.VISIBLE);
+                    captionText.setText(post.getCaption());
+                    captionText.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"fonts/Dosis.ttf"), Typeface.ITALIC);
+
+                    Glide.with(getActivity())
+                            .load(post.getUrl())
+                            .crossFade()
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .listener(new RequestListener<String, GlideDrawable>() {
+                                          @Override
+                                          public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                                              return false;
+                                          }
+
+                                          @Override
+                                          public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                                              favBtn.show();
+                                              loadingBar.setVisibility(View.GONE);
+                                              return false;
+                                          }
+                                      }
+                            )
+                            .into(imageViewPreview);
                 }
-            });
+            }
 
-            if(post.getPrivacy() && !posts.get(position).getUid().equals(preferences.getString("LOGGEDIN_UID",""))){
-                request_btn.setVisibility(View.VISIBLE);
-                captionText.setVisibility(View.INVISIBLE);
-                Glide.with(getActivity())
-                        .load(post.getUrl())
-                        .crossFade()
-                        .bitmapTransform(new BlurTransformation(getActivity(),50))
-                        .listener(new RequestListener<String, GlideDrawable>() {
-                                      @Override
-                                      public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                                          return false;
-                                      }
+            if(eventPosts != null){
 
-                                      @Override
-                                      public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                                          favBtn.hide();
-                                          loadingBar.setVisibility(View.GONE);
-                                          return false;
-                                      }
-                                  }
-                        )
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .into(imageViewPreview);
-            }else{
+                final EventPost post = eventPosts.get(position);
+
+                favBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                            ActivityCompat.requestPermissions(getActivity(),
+                                    new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                    10);
+                        }else{
+                            saveToInternalStorage(imageViewPreview,post.getTime());
+                        }
+                    }
+                });
+
+
                 request_btn.setVisibility(View.INVISIBLE);
                 captionText.setVisibility(View.VISIBLE);
-                captionText.setText(post.getCaption());
+                captionText.setText("");
                 captionText.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"fonts/Dosis.ttf"), Typeface.ITALIC);
 
                 Glide.with(getActivity())
@@ -342,6 +360,7 @@ public class SlideShowDialogFragment extends DialogFragment {
                         )
                         .into(imageViewPreview);
             }
+
 
             final ScaleGestureDetector mScaleDetector = new ScaleGestureDetector(getActivity(), new MyPinchListener());
             imageViewPreview.setOnTouchListener(new View.OnTouchListener() {
@@ -441,7 +460,13 @@ public class SlideShowDialogFragment extends DialogFragment {
 
         @Override
         public int getCount() {
-            return posts.size();
+            if(posts != null){
+                return posts.size();
+            }else if(eventPosts != null){
+                return eventPosts.size();
+            }else{
+                return 0;
+            }
         }
 
         @Override

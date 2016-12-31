@@ -17,6 +17,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.os.EnvironmentCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -50,12 +51,13 @@ import java.util.Collections;
  */
 public class PhotoFragment extends Fragment {
 
+    public final String APP_TAG = "Moments";
     Context context;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseAuth mAuth;
     private FloatingActionButton add_btn;
     private static final int PICS_FROM_CAMERA = 0;
-    String time;
+    String time, photoFileName;
     FirebaseDatabase database;
     SharedPreferences preferences;
     Query query;
@@ -119,34 +121,7 @@ public class PhotoFragment extends Fragment {
         add_btn = (FloatingActionButton)v.findViewById(R.id.add_photo_btn);
         photo_placeholder = (RelativeLayout)v.findViewById(R.id.photo_placeholder);
         photo_list = (RecyclerView)v.findViewById(R.id.photo_list);
-//        spinner = (Spinner) v.findViewById(R.id.spinner);
 
-//        // Spinner Drop down elements
-//        List<String> categories = new ArrayList<String>();
-//        categories.add("Worldwide");
-//        categories.add("Around you");
-
-//        // Spinner click listener
-//        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-//
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> adapterView) {
-//
-//            }
-//        });
-//
-//        // Creating adapter for spinner
-//        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, categories);
-//
-//        // attaching data adapter to spinner
-//        spinner.setAdapter(dataAdapter);
-//
-////        // Drop down layout style - list view with radio button
-////        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
         itemAnimator.setAddDuration(1000);
         itemAnimator.setRemoveDuration(1000);
@@ -222,11 +197,37 @@ public class PhotoFragment extends Fragment {
     }
 
     private void capturePicture() {
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         time = String.valueOf(System.currentTimeMillis());
-        Uri uri  = Uri.parse("file:///sdcard/"+"memories_"+time+".jpg");
-        intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
+        photoFileName = "moments_"+time+".jpg";
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//        Uri uri  = Uri.parse(Environment.getExternalStorageDirectory().getPath(), "memories_"+time+".jpg");
+        intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, getPhotoFileUri(photoFileName));
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivityForResult(intent,PICS_FROM_CAMERA);
+    }
+
+    private Uri getPhotoFileUri(String fileName) {
+        // Only continue if the SD Card is mounted
+        if (isExternalStorageAvailable()) {
+            // Get safe storage directory for photos
+            // Use `getExternalFilesDir` on Context to access package-specific directories.
+            // This way, we don't need to request external read/write runtime permissions.
+            File mediaStorageDir = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), APP_TAG);
+
+            // Create the storage directory if it does not exist
+            if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()){
+                Log.d(APP_TAG, "failed to create directory");
+            }
+
+            // Return the file target for the photo based on filename
+            return Uri.fromFile(new File(mediaStorageDir.getPath() + File.separator + fileName));
+        }
+        return null;
+    }
+
+    private boolean isExternalStorageAvailable() {
+        String state = Environment.getExternalStorageState();
+        return state.equals(Environment.MEDIA_MOUNTED);
     }
 
     @Override
@@ -249,10 +250,11 @@ public class PhotoFragment extends Fragment {
         if (resultCode != Activity.RESULT_OK) return;
         switch (requestCode) {
             case PICS_FROM_CAMERA:
-                File file = new File(Environment.getExternalStorageDirectory().getPath(), "memories_" + time + ".jpg");
-                Uri imageUri = Uri.fromFile(file);
+//                File file = new File(Environment.getExternalStorageDirectory().getPath(), "memories_" + time + ".jpg");
+                Uri imageUri = getPhotoFileUri(photoFileName);
                 Intent intent = new Intent(context, PreviewActivity.class);
                 intent.putExtra("image_uri", imageUri.toString());
+                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 intent.putExtra("time",time);
                 startActivity(intent);
         }

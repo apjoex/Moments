@@ -199,9 +199,6 @@ public class Requests extends AppCompatActivity {
         });
     }
 
-
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_requests, menu);

@@ -7,6 +7,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -24,6 +25,7 @@ import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -96,6 +98,12 @@ public class DialogActivity extends AppCompatActivity {
             getWindow().setStatusBarColor(getResources().getColor(R.color.colorWhite));
         }
 
+        //Check if location turned on
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+            Toast.makeText(this, "Please turn on GPS on your device", Toast.LENGTH_SHORT).show();
+        }
+
         //Location
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 // The next two lines tell the new client that “this” current class will handle connection stuff
@@ -141,7 +149,6 @@ public class DialogActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onKeyExited(String key) {
-
                                 }
 
                                 @Override
@@ -153,6 +160,7 @@ public class DialogActivity extends AppCompatActivity {
                                 public void onGeoQueryReady() {
                                     if(eventIds.size() == 0){
                                         no_event_box.setVisibility(View.VISIBLE);
+                                        event_box.setVisibility(View.INVISIBLE);
                                     }else{
                                         for (int i = 0; i < eventIds.size(); i++){
                                             final int finalI = i;
@@ -162,7 +170,7 @@ public class DialogActivity extends AppCompatActivity {
                                                     events.add(dataSnapshot.getValue(Event.class));
                                                     if(finalI == eventIds.size() - 1){
                                                         event_box.setVisibility(View.VISIBLE);
-                                                        adapter = new EventAdapter(context, events);
+                                                        adapter = new EventAdapter(DialogActivity.this,context, events);
                                                         event_list.setAdapter(adapter);
                                                     }
                                                 }

@@ -193,7 +193,7 @@ public class Home extends AppCompatActivity {
             View view = getLayoutInflater().inflate(R.layout.toolbar_layout, null);
             AlertDialog dialog = new AlertDialog.Builder(context)
                     .setCustomTitle(view)
-                    .setMessage("Moments was created in the moment for your moments!👍\n\nVersion: "+BuildConfig.VERSION_NAME)
+                    .setMessage("Moments was created in the moment to capture your moments - photos and short videos alike!👍\n\nVersion: "+BuildConfig.VERSION_NAME)
                     .setPositiveButton("GET IN TOUCH", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -219,9 +219,12 @@ public class Home extends AppCompatActivity {
                             editor.putBoolean("Moments_signin",false);
                             editor.putString("LOGGEDIN_UID","");
                             editor.putString("LOGGEDIN_NAME","");
+                            editor.putString("Event_details","");
+                            editor.putBoolean("Event_active",false);
                             editor.apply();
                             Intent intent = new Intent(context, SplashScreen.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            intent.setFlags( Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            intent.putExtra("fromSignOut",true);
                             startActivity(intent);
                         }
                     }).setNegativeButton("NO", new DialogInterface.OnClickListener() {
@@ -257,8 +260,8 @@ public class Home extends AppCompatActivity {
 
     private void showExit() {
         AlertDialog.Builder exit_builder = new AlertDialog.Builder(context);
-        exit_builder.setTitle("Exit")
-                .setMessage("Do you really want to exit this app?")
+        exit_builder.setTitle("Close Moments")
+                .setMessage("Do you really want to close Moments?")
                 .setPositiveButton("YES", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {

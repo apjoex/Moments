@@ -21,3 +21,43 @@
         app:bb_tabXmlResource="@xml/bottombar_tabs" />
 
 </RelativeLayout>
+
+
+<!--<android.support.design.widget.CoordinatorLayout-->
+<!--xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--xmlns:app="http://schemas.android.com/apk/res-auto"-->
+<!--xmlns:tools="http://schemas.android.com/tools"-->
+<!--tools:context="com.x.memories.Home"-->
+<!--android:layout_width="match_parent"-->
+<!--android:layout_height="match_parent">-->
+
+<!--<android.support.v4.widget.NestedScrollView-->
+    <!--android:id="@+id/myScrollingContent"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent">-->
+
+    <!--&lt;!&ndash; Your loooooong scrolling content here. &ndash;&gt;-->
+
+    <!--<RelativeLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent">-->
+
+        <!--<FrameLayout-->
+            <!--android:id="@+id/contentContainer"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent" />-->
+
+    <!--</RelativeLayout>-->
+
+<!--</android.support.v4.widget.NestedScrollView>-->
+
+<!--<com.roughike.bottombar.BottomBar-->
+    <!--android:id="@+id/bottomBar"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="60dp"-->
+    <!--android:layout_gravity="bottom"-->
+    <!--app:bb_activeTabColor="@color/colorPrimaryDark"-->
+    <!--app:bb_tabXmlResource="@xml/bottombar_tabs"-->
+    <!--app:bb_behavior="shy"/>-->
+
+<!--</android.support.design.widget.CoordinatorLayout>-->

@@ -31,7 +31,7 @@
             android:weightSum="2"
             android:orientation="horizontal">
 
-            <Button
+            <android.support.v7.widget.AppCompatButton
                 android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -39,7 +39,7 @@
                 android:id="@+id/join_btn"
                 android:text="JOIN"/>
 
-            <Button
+            <android.support.v7.widget.AppCompatButton
                 android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -56,7 +56,146 @@
         android:layout_height="match_parent"
         android:background="#fff"
         android:id="@+id/event_showbox"
-        android:visibility="invisible">
+        android:visibility="visible">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="false">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@color/colorAccent"
+                android:elevation="4dp"
+                android:orientation="horizontal"
+                android:weightSum="2"
+                android:id="@+id/linearLayout">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="left"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:padding="10dp"
+                        android:layout_marginLeft="10dp"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:src="@drawable/ic_event_full"
+                        android:layout_marginRight="10dp"
+                        android:tint="#fff"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:textColor="#fff"
+                        android:id="@+id/event_name"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:text="Event name " />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="right"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="50dp"
+                        android:id="@+id/share_event"
+                        android:src="@drawable/ic_share"
+                        android:layout_marginRight="25dp"
+                        android:tint="#fff"/>
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="50dp"
+                        android:id="@+id/add_event_photo"
+                        android:src="@drawable/ic_add_fancy"
+                        android:layout_marginRight="25dp"
+                        android:tint="#fff"/>
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="50dp"
+                        android:id="@+id/exit_event"
+                        android:src="@drawable/ic_exit"
+                        android:layout_marginRight="15dp"
+                        android:tint="#fff"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/linearLayout"
+                android:id="@+id/event_empty">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:layout_centerVertical="true"
+                    android:layout_centerHorizontal="true">
+
+                    <ImageView
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:src="@drawable/ic_opened_box" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/tag"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:text="Fetching event photos... " />
+
+                    <ProgressBar
+                        style="?android:attr/progressBarStyleSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/loading"
+                        android:layout_marginTop="8dp" />
+
+
+                </LinearLayout>
+
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/linearLayout"
+                android:background="#fff"
+                android:id="@+id/event_pics"
+                android:visibility="invisible">
+
+                <android.support.v7.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingTop="3dp"
+                    android:paddingLeft="3dp"
+                    android:paddingRight="3dp"
+                    android:id="@+id/photo_list"/>
+
+            </RelativeLayout>
+
+
+        </RelativeLayout>
+
 
     </RelativeLayout>
 

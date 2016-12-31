@@ -39,6 +39,7 @@ import com.isseiaoki.simplecropview.CropImageView;
 import com.isseiaoki.simplecropview.callback.CropCallback;
 import com.isseiaoki.simplecropview.callback.LoadCallback;
 import com.isseiaoki.simplecropview.callback.SaveCallback;
+import com.x.memories.models.Event;
 import com.x.memories.reusables.Utilities;
 import com.x.memories.services.UploadService;
 
@@ -57,6 +58,7 @@ public class PreviewActivity extends AppCompatActivity {
     String uid;
     Boolean privacy = false;
     SharedPreferences preferences;
+    Event event;
 
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private GoogleApiClient mGoogleApiClient;
@@ -68,6 +70,7 @@ public class PreviewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         setContentView(R.layout.activity_preview);
         context = this;
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -93,6 +96,7 @@ public class PreviewActivity extends AppCompatActivity {
         preview = (CropImageView) findViewById(R.id.preview);
         send_btn = (Button) findViewById(R.id.send_btn);
         caption_box = (EditText) findViewById(R.id.caption_box);
+        event = (Event) getIntent().getExtras().getSerializable("event");
 
         assert getSupportActionBar() != null;
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
@@ -230,6 +234,11 @@ public class PreviewActivity extends AppCompatActivity {
                                 myIntent.putExtra("privacy",privacy);
                                 myIntent.putExtra("lat",currentLatitude);
                                 myIntent.putExtra("long",currentLongitude);
+                                if(event != null){
+                                    Bundle bundle = new Bundle();
+                                    bundle.putSerializable("event",event);
+                                    myIntent.putExtras(bundle);
+                                }
                                 startService(myIntent);
                                 finish();
                             }
@@ -248,7 +257,6 @@ public class PreviewActivity extends AppCompatActivity {
         });
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.preview_menu, menu);
@@ -261,6 +269,10 @@ public class PreviewActivity extends AppCompatActivity {
                 privacy = b;
             }
         });
+
+        if(event != null){
+            item.setVisible(false);
+        }
         return true;
     }
 

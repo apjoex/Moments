@@ -34,20 +34,22 @@
 
         <Button
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="40dp"
+            android:layout_margin="5dp"
             android:id="@+id/send_btn"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
             android:text="POST"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"/>
+            style="@style/Widget.AppCompat.Button.Colored"/>
 
         <EditText
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:id="@+id/caption_box"
-            android:hint="Add a caption"
+            android:hint="Add a caption..."
             android:singleLine="true"
             android:maxLength="50"
+            android:maxLines="1"
             android:layout_centerVertical="true"
             android:layout_alignParentStart="true"
             android:background="@android:color/transparent"

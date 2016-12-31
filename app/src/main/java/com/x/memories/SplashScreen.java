@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -83,13 +84,29 @@ public class SplashScreen extends AppCompatActivity {
                     signin_btn.setVisibility(View.VISIBLE);
                 }
             }
-
         };
 
         //Set light status bar
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
             getWindow().setStatusBarColor(getResources().getColor(R.color.colorWhite));
+        }
+
+       // myapp://path/to/what/i/want?keyOne=valueOne&keyTwo=valueTwo
+
+        Intent intent = getIntent();
+        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+            Uri uri = intent.getData();
+            String eventId = uri.getQueryParameter("event");
+            Log.d("INTENT_DATA", eventId);
+            if(preferences.getBoolean("Moments_signin",false)){
+//                Toast.makeText(context, "You don sign in already...", Toast.LENGTH_SHORT).show();
+                Intent intent1 = new Intent(context, JoinEvent.class);
+                intent1.putExtra("event",eventId);
+                startActivity(intent1);
+            }else{
+                Toast.makeText(context, "Please sign in", Toast.LENGTH_SHORT).show();
+            }
         }
 
         ColorStateList stateList =  ColorStateList.valueOf(Color.rgb(0,151,214));
@@ -106,6 +123,13 @@ public class SplashScreen extends AppCompatActivity {
 //            signin_btn.setVisibility(View.INVISIBLE);
 //            startTimer();
 //        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(!getIntent().getBooleanExtra("fromSignOut",false)){
+            super.onBackPressed();
+        }
     }
 
     private void showSignIn() {

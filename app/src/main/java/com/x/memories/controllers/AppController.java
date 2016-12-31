@@ -1,6 +1,7 @@
 package com.x.memories.controllers;
 
 import android.content.Context;
+import android.os.StrictMode;
 
 import com.x.memories.R;
 
@@ -21,9 +22,12 @@ public class AppController extends android.app.Application {
         mInstance = this;
         context = getApplicationContext();
         CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
-                .setDefaultFontPath("fonts/Dosis.ttf")
+                .setDefaultFontPath("fonts/Roboto.ttf")
                 .setFontAttrId(R.attr.fontPath)
                 .build());
+
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
     }
 
     public static synchronized AppController getInstance() {

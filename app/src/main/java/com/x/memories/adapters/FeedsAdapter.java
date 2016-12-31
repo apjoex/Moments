@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
@@ -88,9 +89,8 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
                         holder.privacy_logo.setVisibility(View.INVISIBLE);
                         Glide.with(context)
                                 .load(posts.get(position).getUrl())
-                                .placeholder(R.drawable.memories_grey)
                                 .diskCacheStrategy(DiskCacheStrategy.ALL)
-                                .bitmapTransform(new BlurTransformation(context,50), new CropSquareTransformation(context))
+                                .bitmapTransform(new BlurTransformation(context,50), new CenterCrop(context))
                                 .listener(new RequestListener<String, GlideDrawable>() {
                                     @Override
                                     public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
@@ -110,9 +110,8 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
                     if(holder.thumbnail != null){
                         Glide.with(context)
                                 .load(posts.get(position).getUrl())
-                                .placeholder(R.drawable.memories_grey)
+                                .centerCrop()
                                 .diskCacheStrategy(DiskCacheStrategy.ALL)
-                                .bitmapTransform(new CropSquareTransformation(context))
                                 .into(holder.thumbnail);
                     }
                 }
